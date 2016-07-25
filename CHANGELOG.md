@@ -1,3 +1,8 @@
+# 5.4.0
+  Changes from 5.3.0
+    - API:
+      - `annotations=true` now returns the data source id for each segment as `datasources`
+
 # 5.3.0
   Changes from 5.3.0-rc.3
     - Guidance
