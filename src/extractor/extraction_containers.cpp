@@ -96,7 +96,6 @@ struct CmpEdgeByInternalSourceTargetAndName
     const oe::ExtractionContainers::STXXLNameCharData &name_data;
     const oe::ExtractionContainers::STXXLNameOffsets &name_offsets;
 };
-
 }
 
 namespace osrm
@@ -199,7 +198,8 @@ void ExtractionContainers::WriteCharData(const std::string &file_name)
     // transforms in-place name offsets to name lengths
     BOOST_ASSERT(!name_offsets.empty());
     for (auto curr = name_offsets.begin(), next = name_offsets.begin() + 1;
-         next != name_offsets.end(); ++curr, ++next)
+         next != name_offsets.end();
+         ++curr, ++next)
     {
         *curr = *next - *curr;
     }
@@ -323,8 +323,8 @@ void ExtractionContainers::PrepareEdges(ScriptingEnvironment &scripting_environm
     {
         if (edge_iterator->result.osm_source_id < node_iterator->node_id)
         {
-            util::SimpleLogger().Write(LogLevel::logWARNING) << "Found invalid node reference "
-                                                             << edge_iterator->result.source;
+            util::SimpleLogger().Write(LogLevel::logDEBUG) << "Found invalid node reference "
+                                                           << edge_iterator->result.source;
             edge_iterator->result.source = SPECIAL_NODEID;
             ++edge_iterator;
             continue;
@@ -359,8 +359,8 @@ void ExtractionContainers::PrepareEdges(ScriptingEnvironment &scripting_environm
     // Remove all remaining edges. They are invalid because there are no corresponding nodes for
     // them. This happens when using osmosis with bbox or polygon to extract smaller areas.
     auto markSourcesInvalid = [](InternalExtractorEdge &edge) {
-        util::SimpleLogger().Write(LogLevel::logWARNING) << "Found invalid node reference "
-                                                         << edge.result.source;
+        util::SimpleLogger().Write(LogLevel::logDEBUG) << "Found invalid node reference "
+                                                       << edge.result.source;
         edge.result.source = SPECIAL_NODEID;
         edge.result.osm_source_id = SPECIAL_OSM_NODEID;
     };
@@ -394,7 +394,7 @@ void ExtractionContainers::PrepareEdges(ScriptingEnvironment &scripting_environm
 
         if (edge_iterator->result.osm_target_id < node_iterator->node_id)
         {
-            util::SimpleLogger().Write(LogLevel::logWARNING)
+            util::SimpleLogger().Write(LogLevel::logDEBUG)
                 << "Found invalid node reference "
                 << static_cast<uint64_t>(edge_iterator->result.osm_target_id);
             edge_iterator->result.target = SPECIAL_NODEID;
@@ -462,8 +462,8 @@ void ExtractionContainers::PrepareEdges(ScriptingEnvironment &scripting_environm
     // Remove all remaining edges. They are invalid because there are no corresponding nodes for
     // them. This happens when using osmosis with bbox or polygon to extract smaller areas.
     auto markTargetsInvalid = [](InternalExtractorEdge &edge) {
-        util::SimpleLogger().Write(LogLevel::logWARNING) << "Found invalid node reference "
-                                                         << edge.result.target;
+        util::SimpleLogger().Write(LogLevel::logDEBUG) << "Found invalid node reference "
+                                                       << edge.result.target;
         edge.result.target = SPECIAL_NODEID;
     };
     std::for_each(edge_iterator, all_edges_list_end_, markTargetsInvalid);
@@ -722,7 +722,7 @@ void ExtractionContainers::PrepareRestrictions()
         if (way_start_and_end_iterator->way_id >
             OSMWayID{static_cast<std::uint32_t>(restrictions_iterator->restriction.from.way)})
         {
-            util::SimpleLogger().Write(LogLevel::logWARNING)
+            util::SimpleLogger().Write(LogLevel::logDEBUG)
                 << "Restriction references invalid way: "
                 << restrictions_iterator->restriction.from.way;
             restrictions_iterator->restriction.from.node = SPECIAL_NODEID;
@@ -730,8 +730,9 @@ void ExtractionContainers::PrepareRestrictions()
             continue;
         }
 
-        BOOST_ASSERT(way_start_and_end_iterator->way_id ==
-                     OSMWayID{static_cast<std::uint32_t>(restrictions_iterator->restriction.from.way)});
+        BOOST_ASSERT(
+            way_start_and_end_iterator->way_id ==
+            OSMWayID{static_cast<std::uint32_t>(restrictions_iterator->restriction.from.way)});
         // we do not remap the via id yet, since we will need it for the to node as well
         const OSMNodeID via_node_id = OSMNodeID{restrictions_iterator->restriction.via.node};
 
@@ -739,7 +740,7 @@ void ExtractionContainers::PrepareRestrictions()
         auto via_id_iter = external_to_internal_node_id_map.find(via_node_id);
         if (via_id_iter == external_to_internal_node_id_map.end())
         {
-            util::SimpleLogger().Write(LogLevel::logWARNING)
+            util::SimpleLogger().Write(LogLevel::logDEBUG)
                 << "Restriction references invalid node: "
                 << restrictions_iterator->restriction.via.node;
             restrictions_iterator->restriction.via.node = SPECIAL_NODEID;
@@ -754,7 +755,7 @@ void ExtractionContainers::PrepareRestrictions()
                 way_start_and_end_iterator->first_segment_target_id);
             if (id_iter == external_to_internal_node_id_map.end())
             {
-                util::SimpleLogger().Write(LogLevel::logWARNING)
+                util::SimpleLogger().Write(LogLevel::logDEBUG)
                     << "Way references invalid node: "
                     << way_start_and_end_iterator->first_segment_target_id;
                 restrictions_iterator->restriction.from.node = SPECIAL_NODEID;
@@ -771,7 +772,7 @@ void ExtractionContainers::PrepareRestrictions()
                 way_start_and_end_iterator->last_segment_source_id);
             if (id_iter == external_to_internal_node_id_map.end())
             {
-                util::SimpleLogger().Write(LogLevel::logWARNING)
+                util::SimpleLogger().Write(LogLevel::logDEBUG)
                     << "Way references invalid node: "
                     << way_start_and_end_iterator->last_segment_target_id;
                 restrictions_iterator->restriction.from.node = SPECIAL_NODEID;
@@ -828,8 +829,9 @@ void ExtractionContainers::PrepareRestrictions()
             ++restrictions_iterator;
             continue;
         }
-        BOOST_ASSERT(way_start_and_end_iterator->way_id ==
-                     OSMWayID{static_cast<std::uint32_t>(restrictions_iterator->restriction.to.way)});
+        BOOST_ASSERT(
+            way_start_and_end_iterator->way_id ==
+            OSMWayID{static_cast<std::uint32_t>(restrictions_iterator->restriction.to.way)});
         const OSMNodeID via_node_id = OSMNodeID{restrictions_iterator->restriction.via.node};
 
         // assign new via node id
@@ -843,7 +845,7 @@ void ExtractionContainers::PrepareRestrictions()
                 way_start_and_end_iterator->first_segment_target_id);
             if (to_id_iter == external_to_internal_node_id_map.end())
             {
-                util::SimpleLogger().Write(LogLevel::logWARNING)
+                util::SimpleLogger().Write(LogLevel::logDEBUG)
                     << "Way references invalid node: "
                     << way_start_and_end_iterator->first_segment_source_id;
                 restrictions_iterator->restriction.to.node = SPECIAL_NODEID;
@@ -859,7 +861,7 @@ void ExtractionContainers::PrepareRestrictions()
                 way_start_and_end_iterator->last_segment_source_id);
             if (to_id_iter == external_to_internal_node_id_map.end())
             {
-                util::SimpleLogger().Write(LogLevel::logWARNING)
+                util::SimpleLogger().Write(LogLevel::logDEBUG)
                     << "Way references invalid node: "
                     << way_start_and_end_iterator->last_segment_source_id;
                 restrictions_iterator->restriction.to.node = SPECIAL_NODEID;
