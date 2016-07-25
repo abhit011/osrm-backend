@@ -1,6 +1,6 @@
+#include "extractor/guidance/sliproad_handler.hpp"
 #include "extractor/guidance/constants.hpp"
 #include "extractor/guidance/intersection_scenario_three_way.hpp"
-#include "extractor/guidance/sliproad_handler.hpp"
 #include "extractor/guidance/toolkit.hpp"
 
 #include "util/guidance/toolkit.hpp"
@@ -143,8 +143,8 @@ operator()(const NodeID, const EdgeID source_edge_id, Intersection intersection)
                     }
                     else
                     {
-                        const auto skip_traffic_light_intersection =
-                            intersection_generator(node_based_graph.GetTarget(candidate_in), candidate_road.turn.eid);
+                        const auto skip_traffic_light_intersection = intersection_generator(
+                            node_based_graph.GetTarget(candidate_in), candidate_road.turn.eid);
                         if (skip_traffic_light_intersection.size() == 2 &&
                             node_based_graph.GetTarget(
                                 skip_traffic_light_intersection[1].turn.eid) ==
